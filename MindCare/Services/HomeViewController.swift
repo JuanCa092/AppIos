@@ -116,7 +116,7 @@ final class HomeViewController: UIViewController {
             self.navigationController?.pushViewController(DiaryViewController(), animated: true)
         })
         sheet.addAction(UIAlertAction(title: "Mini tareas", style: .default) { _ in
-            self.navigationController?.pushViewController(DiaryViewController(), animated: true)
+            self.navigationController?.pushViewController(DiaryViewController(startOnTasks: true), animated: true)
         })
         sheet.addAction(UIAlertAction(title: "Perfil", style: .default) { _ in
             self.navigationController?.pushViewController(ProfileViewController(), animated: true)
