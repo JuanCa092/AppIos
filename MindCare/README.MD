@@ -1,52 +1,85 @@
-cosas para ejecutar
-Una Mac (MacBook, iMac o Mac mini)	Xcode solo corre en macOS. Si no tiene Mac, puede alquilar una en la nube (MacinCloud, por ejemplo), pero es más lento e incómodo	–
-Xcode (Mac App Store)	Compilar, simulador y firma de la app	Gratis
-Apple ID	Firmar la app para probarla en su iPhone	Gratis
-iPhone real + cable	Probar el 113 y las notificaciones	–
-Clave de Gemini (Google AI Studio)	Que funcione el chat	Gratis con límites
-La versión de Xcode que pueda instalar depende de la versión de macOS de su Mac. Que revise eso primero, porque Xcode pesa varios GB y tarda en descargarse.
+# MindCare 💙
 
-Pasos
+App iOS de bienestar emocional. Ofrece un acompañante con IA (Gemini), ejercicios de respiración, un registro diario del ánimo y acceso rápido a una línea de ayuda en caso de crisis.
 
-1. Crear el proyecto
-Xcode → File → New → Project → iOS → App. Product Name: MindCare, Interface: Storyboard, Language: Swift. Luego en el proyecto, pestaña General, pone Minimum Deployments en iOS 15.0 o superior.
+> MindCare es un acompañante de bienestar y **no reemplaza la atención de un profesional de la salud mental**.
 
-2. Pasar los archivos
-Los escribes en VS Code y los mandan por GitHub, USB o zip. En Xcode los arrastran al proyecto marcando “Copy items if needed” y que el target MindCare esté seleccionado. Si usan carpetas (Controllers, Models, Services), que las creen como groups.
+## Funcionalidades
 
-3. Quitar el storyboard
+- **Login simple**: el usuario ingresa su nombre y entra.
+- **Registro de ánimo**: calificación de 1 a 5 estrellas con un emoji que cambia según la nota. Si la calificación es baja (1 o 2), la app ofrece un ejercicio o hablar con el chat.
+- **Ejercicios de respiración** guiados con un círculo animado:
+  - Contra la ansiedad: 4-7-8
+  - Contra los nervios: respiración cuadrada 4-4-4-4
+  - Para calmar la ira: exhalación larga 4-6
+- **Chat con Gemini**: conversación con memoria del historial. Detecta palabras de riesgo y muestra un banner rojo hacia la ayuda urgente, independientemente de lo que responda la IA.
+- **Ayuda urgente**: abre el marcador del teléfono con el **113** (línea de ayuda de Perú) ya marcado.
+- **Diario**: bloc de notas (crear, editar, borrar) y mini tareas diarias que se reinician cada día, al estilo Duolingo.
+- **Perfil y ajustes**: cambiar nombre, resumen del ánimo, recordatorio diario a las 8:00 pm, borrar historial o cerrar sesión.
 
-Borrar Main.storyboard (Move to Trash).
-En Info.plist, dentro de Application Scene Manifest → Scene Configuration → Application Session Role → Item 0, borrar la fila Storyboard Name.
-En Build Settings, buscar UIKit Main Storyboard File Base Name y dejarlo vacío.
+## Flujo de pantallas
 
-4. Poner el arranque en SceneDelegate.swift
-Reemplazar scene(_:willConnectTo:options:) por el código que te di al inicio:
+```
+Login → Welcome → Home ─┬─ Ejercicios
+                        ├─ Chat con Gemini
+                        ├─ Ayuda urgente (113)
+                        └─ Ver más ─┬─ Diario (notas y mini tareas)
+                                    └─ Perfil y ajustes
+```
 
-swift
-guard let windowScene = scene as? UIWindowScene else { return }
-window = UIWindow(windowScene: windowScene)
-window?.rootViewController = UINavigationController(rootViewController: LoginViewController())
-window?.makeKeyAndVisible()
+## Estructura del proyecto
 
-5. Poner la API key
-En GeminiService.swift, reemplazar "TU_API_KEY". Que no suban la clave a GitHub; si el repo es público, mejor tenerla en un archivo aparte incluido en .gitignore.
+```
+MindCare/
+├── Controllers/
+│   ├── LoginViewController.swift
+│   ├── WelcomeViewController.swift
+│   ├── HomeViewController.swift
+│   ├── ExercisesViewController.swift
+│   ├── ChatViewController.swift
+│   ├── EmergencyViewController.swift
+│   ├── DiaryViewController.swift
+│   └── ProfileViewController.swift
+├── Models/
+│   ├── User.swift
+│   ├── Emotion.swift
+│   └── DiaryItems.swift        (Note y TaskItem)
+└── Services/
+    ├── GeminiService.swift     (API de Gemini)
+    └── StorageService.swift    (persistencia con UserDefaults)
+```
 
-6. Probar en el simulador
-Elegir un iPhone en la barra superior y pulsar ▶ Run (⌘R). Sirve para ver el flujo, el chat y los ejercicios. El botón del 113 no marcará en el simulador.
+## Tecnologías
 
-7. Probar en un iPhone real
+- Swift y **UIKit** (interfaz 100 % programática, sin storyboard)
+- iOS 15.0 o superior
+- API de Google Gemini
+- `UserDefaults` para guardar datos localmente
+- `UserNotifications` para el recordatorio diario
 
-Conectar el iPhone y confiar en la Mac.
-En el iPhone: Ajustes → Privacidad y seguridad → Modo de desarrollador → activar (reinicia).
-En Xcode: proyecto → Signing & Capabilities → marcar Automatically manage signing y elegir su Apple ID en Team.
-Seleccionar el iPhone como destino y pulsar Run.
-La primera vez, en el iPhone: Ajustes → General → VPN y gestión de dispositivos → confiar en el desarrollador.
+## Cómo compilar
 
-Con Apple ID gratuito, la app caduca a los 7 días y hay que volver a instalarla desde Xcode. Con el programa de pago dura más y se puede distribuir.
+**Requisitos:** una Mac con Xcode, un Apple ID y, para probar el 113 y las notificaciones, un iPhone real.
 
-Errores comunes la primera vez
-“Cannot find ‘XViewController’ in scope”: el archivo no tiene marcado el target. Se arregla en el panel derecho, Target Membership.
-Pantalla negra al abrir: quedó la referencia al storyboard en el Info.plist o en Build Settings.
-Error 404 o 400 en el chat: nombre del modelo desactualizado o clave mal copiada.
-keyboardLayoutGuide no existe: el deployment target está por debajo de iOS 15.
+1. En Xcode: *File → New → Project → iOS → App* (nombre `MindCare`, Swift, Storyboard).
+2. En *General*, fijar **Minimum Deployments** en iOS 15.0 o superior.
+3. Arrastrar las carpetas `Controllers`, `Models` y `Services` al proyecto (marcar *Copy items if needed* y el target `MindCare`).
+4. Quitar el storyboard: borrar `Main.storyboard`, eliminar la fila *Storyboard Name* del `Info.plist` y vaciar *UIKit Main Storyboard File Base Name* en *Build Settings*.
+5. En `SceneDelegate.swift`, arrancar con `LoginViewController` dentro de un `UINavigationController`.
+6. Pegar la API key en `Services/GeminiService.swift` (se obtiene gratis en Google AI Studio).
+7. Elegir un simulador o iPhone y pulsar **Run** (⌘R).
+
+## Notas importantes
+
+- **API key**: no subirla a un repositorio público. Para publicar la app, lo recomendable es guardarla en un backend propio.
+- **Modelo de Gemini**: si el chat da error 404, revisar que el nombre del modelo en `GeminiService.swift` siga vigente.
+- **Línea de ayuda**: el 113 corresponde a Perú. Para otro país hay que cambiar la constante en `EmergencyViewController`.
+- **Simulador**: no puede hacer llamadas, así que el 113 solo se prueba en un iPhone real.
+- **Datos**: se guardan solo en el dispositivo; no hay cuentas ni servidor.
+
+## Posibles mejoras
+
+- Entrar directo al Home si ya hay un usuario guardado.
+- Gráfico del historial de ánimo en el perfil.
+- Pantalla de notas más completa con `UITextView`.
+- Backend para proteger la API key.
